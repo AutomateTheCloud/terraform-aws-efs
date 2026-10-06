@@ -1,4 +1,4 @@
-# Copyright 2025 Automate the Cloud Inc.
+# Copyright 2026 Automate the Cloud Inc.
 # SPDX-License-Identifier: Apache-2.0
 
 # Regression tests for the bugs fixed when the module was rewritten as 1.0.0.
@@ -79,5 +79,17 @@ run "security_group_name_is_a_prefix" {
   assert {
     condition     = aws_security_group.this.name_prefix == "test-regression-test-use1-efs-"
     error_message = "The security group must be named from a prefix."
+  }
+}
+
+# metadata.security_group had the group's inline ingress and egress, read before the
+# module's rule resources were attached, so the first plan after a create showed the
+# output changing. The rules are in metadata.vpc_security_group_ingress_rule.
+run "inline_rules_left_out_of_metadata" {
+  command = apply
+  variables { security_group_ingress = { vpc = { cidr_ipv4 = "10.0.0.0/16" } } }
+  assert {
+    condition     = !contains(keys(output.metadata.security_group), "ingress") && !contains(keys(output.metadata.security_group), "egress")
+    error_message = "metadata.security_group must leave out the inline ingress and egress."
   }
 }
