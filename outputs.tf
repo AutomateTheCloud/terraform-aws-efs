@@ -1,4 +1,4 @@
-# Copyright 2025 Automate the Cloud Inc.
+# Copyright 2026 Automate the Cloud Inc.
 # SPDX-License-Identifier: Apache-2.0
 
 output "metadata" {
@@ -98,12 +98,13 @@ locals {
       region                             = aws_efs_file_system_policy.this[0].region
     }
 
+    # Left out: ingress and egress, the group's inline rules. They are read when the
+    # group is created, before the module's rules are attached, so they would change
+    # on every caller's next plan. The rules are in vpc_security_group_*_rule instead.
     security_group = {
       arn                    = aws_security_group.this.arn
       description            = aws_security_group.this.description
-      egress                 = aws_security_group.this.egress
       id                     = aws_security_group.this.id
-      ingress                = aws_security_group.this.ingress
       name                   = aws_security_group.this.name
       name_prefix            = aws_security_group.this.name_prefix
       owner_id               = aws_security_group.this.owner_id
